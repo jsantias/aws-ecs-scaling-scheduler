@@ -1,5 +1,15 @@
 # ecs-scaling-scheduler
-Scales all ecs service to 0 or 1 on a specific schedule
+Scales all ecs services in the cluster to 0 or 1 on a specific schedule. 
+
+Start times - 21:00 SUNDAY to THURSDAY UTC Time (07:00 AEST)
+
+Stop times - 12:00 SUNDAY to THURSDAY UTC Time (22:00 AEST)
+
+These times can be adjusted to your liking
+
+## Setting the Start/Stop times
+
+To set the events rules open the `main.yaml` and update the `ScheduleExpression` properties of the resources `StartEcsServicesRuleCloudwatch` and/or `StopEcsServicesRuleCloudwatch`. See the  [documentation](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html ) for forming the cronjob expression 
 
 ## main.yaml
 Deploys the following resources to AWS:
@@ -26,3 +36,26 @@ The zip file has to be uploaded to an S3 bucket before we run the Cloudformation
 The bucket name and the file key, needs to be entered in cloudformation. The cloudformation template
 uses this information to pass the python code to the lambda function during its creation.
 
+## Accessing the API endpoint
+
+The CloudFormation file will output the API endpoint for you. An API key is required to access the API endpoint. You can acquire this under the AWS API Gateway service. An example of the request, replacing the `<API-ENDPOINT>`, `<API-KEY>`,  `<ACTION>`, `<CLUSTER>` :
+
+`<API-ENDPOINT>` - The API endpoint
+
+`<API-KEY>` - The API key
+
+`<ACTION>` - Valid values are `stop` or `start`
+
+`<CLUSTER>` - The name of the ecs cluster
+
+```
+curl --location --request POST <API-ENDPOINT> \
+--header 'x-api-key: <API-KEY>' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "action": "<ACTION>"",
+  "cluster": "<CLUSTER>"
+}'
+```
+
+The API will return a status code 200 if successful
